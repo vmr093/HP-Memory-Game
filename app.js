@@ -1,87 +1,97 @@
-// Define Consts
-
-const cards = document.querySelectorAll('.memory-card');
-const playerLivesCount = document.querySelector('span');
-let playerlives = 10;
-playerLivesCount.textContent = playerlives
-const message=document.querySelector("#message")
-
-
-// Define Variables
-
-let hasFlippedCard = false;
-let lockBoard = false;
-let firstCard, secondCard;
-
-// Define Functions
-
-function flipCard() {
-  if (lockBoard) return;
+document.addEventListener('DOMContentLoaded', () => {
+  const cardElements = document.querySelectorAll('.memory-card');
+  const resetButton = document.getElementById('resetButton');
+  const messageElement = document.getElementById('message');
+  const livesCountElement = document.querySelector('.playerLivesCount');
   
-  if (this === firstCard) return;
+  let lives = 10;
+  let hasFlippedCard = false;
+  let firstCard, secondCard;
+  let lockBoard = false;
+  
+  function shuffleCards() {
+      cardElements.forEach(card => {
+          let randomPos = Math.floor(Math.random() * cardElements.length);
+          card.style.order = randomPos;
+      });
+  }
+  
+  function flipCard() {
+      if (lockBoard || this === firstCard) return;
 
-  this.classList.add('flip');
+      this.classList.add('flip');
+      if (!hasFlippedCard) {
+          // First click
+          hasFlippedCard = true;
+          firstCard = this;
+          return;
+      }
 
-   // When user clicks the first card
-  if (!hasFlippedCard) {    
-    hasFlippedCard = true;
-    firstCard = this;
+      // Second click
+      hasFlippedCard = false;
+      secondCard = this;
 
-    return;
+      checkForMatch();
   }
 
-  secondCard = this;
-  checkForMatch();
-}
-// Looking to see if the cards match by looking at the framework of both cards
-function checkForMatch() {
-  let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
-
-  isMatch ? disableCards() : unflipCards(); // terinary operator allows to write if else statment in one line
-}
-// If it is a match, need to remove the event listener so they arent clickable anymore
-function disableCards() {
-  firstCard.removeEventListener('click', flipCard);
-  secondCard.removeEventListener('click', flipCard);
-
-  resetBoard();
-}
-// if it is not a match, need to flip the cards back around
-function unflipCards() {
-  lockBoard = true; // to make sure no other cards can be selected until the 2 flip back
-  setTimeout(() => { // allows us to see the flipping and the cards
-    firstCard.classList.remove('flip');
-    secondCard.classList.remove('flip');
-    resetBoard();
-}, 1500); 
-
-playerlives--;
-playerLivesCount.textContent = playerlives;
-if(playerlives <=0){
-  playerlives = 0;
-  message.textContent = 'No more Lives! Try again'
-  document.querySelectorAll(".memory-card").forEach((card) => {
-    card.classList.remove("flip"); //will make all cards turn back down
-  });
-  cardFlipped = false;
-  lock = false
-  firstCard = null;
-  secondCard = null;
+  function checkForMatch() {
+      if (firstCard.dataset.framework === secondCard.dataset.framework) {
+          disableCards();
+      } else {
+          unflipCards();
+      }
   }
-}
 
+  function disableCards() {
+      firstCard.removeEventListener('click', flipCard);
+      secondCard.removeEventListener('click', flipCard);
+      resetBoard();
+  }
 
-function resetBoard() {
-  [hasFlippedCard, lockBoard] = [false, false];
-  [firstCard, secondCard] = [null, null];
-}
+  function unflipCards() {
+      lockBoard = true;
+      setTimeout(() => {
+          firstCard.classList.remove('flip');
+          secondCard.classList.remove('flip');
+          resetBoard();
+          updateLives(-1); 
+      }, 1000);
+  }
 
-(function shuffle() {
-  cards.forEach(card => {
-    let randomPos = Math.floor(Math.random() * 12); // returns a random number. Need 11 numbers so x by 12
-    card.style.order = randomPos;
-  });
-})();
+  function updateLives(amount) {
+      lives += amount;
+      livesCountElement.textContent = lives;
 
-cards.forEach(card => card.addEventListener('click', flipCard));
+      if (lives <= 0) {
+          messageElement.textContent = 'Game Over! Click Reset to try again.';
+          cardElements.forEach(card => {
+              card.removeEventListener('click', flipCard);
+          });
+      }
+  }
 
+  function resetBoard() {
+      [hasFlippedCard, lockBoard] = [false, false];
+      [firstCard, secondCard] = [null, null];
+  }
+
+  function initializeGame() {
+      lives = 10;
+      livesCountElement.textContent = lives;
+      shuffleCards();
+      cardElements.forEach(card => {
+          card.classList.remove('flip');
+          card.addEventListener('click', flipCard);
+      });
+      messageElement.textContent = '';
+  }
+
+  function resetGame() {
+      initializeGame();
+  }
+
+  resetButton.addEventListener('click', resetGame);
+
+  
+  initializeGame();
+});
