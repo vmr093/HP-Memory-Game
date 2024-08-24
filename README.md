@@ -5,7 +5,7 @@
 ### How to Play
 + link: https://vmr093.github.io/HarryPotter-Memory-Game/
 
-+ The user will have limited time to flip the cards. When there isn't a match, the cards will unflip and the matched sets will stay flipped. If the user does not match all the cards by the time the timer is up, they will have to resart the game.
++ The user will have limited time to flip the cards. When there isn't a match, the cards will unflip and the matched sets will stay flipped. If the user does not match all the cards by the time the lives are up, they will have to resart the game.
 
 ### Attributes
 + MDN
